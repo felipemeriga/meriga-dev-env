@@ -107,6 +107,18 @@ fisher install owner/repo
 
 The plugin will be automatically added to `fish/fish_plugins`.
 
+## Fish Shell Configuration
+
+### Environment Variables
+The Fish shell is configured with:
+- `EDITOR=nvim` - Neovim as default text editor
+- `VISUAL=nvim` - Neovim as visual editor
+- `FZF_DEFAULT_OPTS` - FZF configuration
+
+### Aliases
+- `ll` - `ls -lah` (detailed list)
+- `v` - `nvim` (quick access to Neovim)
+
 ## Yazi Configuration
 
 Yazi is configured with:
