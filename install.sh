@@ -61,8 +61,27 @@ install_dependencies() {
                 build-essential \
                 unzip \
                 ripgrep \
-                fd-find \
-                fish
+                fd-find
+
+            # Install Fish 4.2.1 from pre-built binary
+            FISH_VERSION="4.2.1"
+            if ! command -v fish &> /dev/null || [ "$(fish --version | grep -oP '[\d.]+' | head -1)" != "$FISH_VERSION" ]; then
+                print_info "Installing Fish $FISH_VERSION..."
+                cd /tmp
+                wget https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-linux-x86_64.tar.xz
+                tar -xf fish-$FISH_VERSION-linux-x86_64.tar.xz
+                sudo install -m755 fish /usr/local/bin/fish
+                rm -f fish fish-$FISH_VERSION-linux-x86_64.tar.xz
+
+                # Add fish to /etc/shells if not present
+                if ! grep -q "/usr/local/bin/fish" /etc/shells; then
+                    echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
+                fi
+
+                print_success "Fish $FISH_VERSION installed"
+            else
+                print_success "Fish $FISH_VERSION already installed"
+            fi
 
             # Install neovim (latest stable)
             if ! command -v nvim &> /dev/null; then
@@ -95,8 +114,27 @@ install_dependencies() {
                 unzip \
                 ripgrep \
                 fd-find \
-                fish \
                 neovim
+
+            # Install Fish 4.2.1 from pre-built binary
+            FISH_VERSION="4.2.1"
+            if ! command -v fish &> /dev/null || [ "$(fish --version | grep -oP '[\d.]+' | head -1)" != "$FISH_VERSION" ]; then
+                print_info "Installing Fish $FISH_VERSION..."
+                cd /tmp
+                wget https://github.com/fish-shell/fish-shell/releases/download/$FISH_VERSION/fish-$FISH_VERSION-linux-x86_64.tar.xz
+                tar -xf fish-$FISH_VERSION-linux-x86_64.tar.xz
+                sudo install -m755 fish /usr/local/bin/fish
+                rm -f fish fish-$FISH_VERSION-linux-x86_64.tar.xz
+
+                # Add fish to /etc/shells if not present
+                if ! grep -q "/usr/local/bin/fish" /etc/shells; then
+                    echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
+                fi
+
+                print_success "Fish $FISH_VERSION installed"
+            else
+                print_success "Fish $FISH_VERSION already installed"
+            fi
 
             # Install yazi
             if ! command -v yazi &> /dev/null; then
@@ -146,7 +184,7 @@ install_dependencies() {
             print_info "Please install the following manually:"
             print_info "  - git, curl, wget"
             print_info "  - neovim (>= 0.9.0)"
-            print_info "  - fish shell"
+            print_info "  - fish shell (>= 4.2.1)"
             print_info "  - yazi file manager"
             print_info "  - ripgrep, fd"
             exit 1
