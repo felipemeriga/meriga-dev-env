@@ -246,14 +246,19 @@ setup_fish() {
 
     print_success "Fish shell configured"
 
-    # Offer to change default shell
-    if [ "$SHELL" != "$(which fish)" ]; then
-        read -p "Do you want to set Fish as your default shell? (y/n) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            chsh -s "$(which fish)"
-            print_success "Default shell changed to Fish"
+    # Change default shell to Fish
+    FISH_PATH="/usr/local/bin/fish"
+    if [ "$SHELL" != "$FISH_PATH" ]; then
+        print_info "Changing default shell to Fish..."
+        if chsh -s "$FISH_PATH" "$USER"; then
+            print_success "Default shell changed to Fish ($FISH_PATH)"
+            print_info "Please log out and log back in for the shell change to take effect"
+        else
+            print_error "Failed to change default shell. You may need to run manually:"
+            print_info "  chsh -s $FISH_PATH \$USER"
         fi
+    else
+        print_success "Fish is already your default shell"
     fi
 }
 

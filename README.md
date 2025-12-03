@@ -31,11 +31,12 @@ cd ~/dotfiles
 
 The script will:
 1. Detect your operating system
-2. Install required dependencies (Neovim, Fish, Yazi, etc.)
+2. Install required dependencies (Neovim, Fish 4.2.1, Yazi, etc.)
 3. Backup your existing configurations
 4. Create symlinks to dotfiles
 5. Install Fish plugins via Fisher
-6. Set up everything automatically
+6. Change your default shell to Fish (requires password)
+7. Set up everything automatically
 
 ### Manual Installation
 
@@ -52,7 +53,12 @@ fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/fun
 
 # Install Fish plugins
 fish -c "fisher update"
+
+# Change default shell to Fish
+chsh -s /usr/local/bin/fish $USER
 ```
+
+**Note:** After changing the shell, log out and log back in for the change to take effect.
 
 ## Neovim Setup
 
