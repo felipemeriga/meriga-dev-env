@@ -27,10 +27,28 @@ return {
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",
+      "theHamsta/nvim-dap-virtual-text", -- Show variable values inline
     },
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
+
+      -- Setup DAP Virtual Text (show variable values inline)
+      require("nvim-dap-virtual-text").setup({
+        enabled = true,
+        enabled_commands = true,
+        highlight_changed_variables = true,
+        highlight_new_as_changed = false,
+        show_stop_reason = true,
+        commented = false,
+        only_first_definition = true,
+        all_references = false,
+        filter_references_pattern = "<module",
+        virt_text_pos = "eol", -- position: 'eol' | 'overlay' | 'right_align'
+        all_frames = false,
+        virt_lines = false,
+        virt_text_win_col = nil,
+      })
 
       -- Setup DAP UI
       dapui.setup({
@@ -67,46 +85,7 @@ return {
         dapui.close()
       end
 
-      -- Rust debugger configuration (using codelldb)
-      local codelldb_path = vim.fn.exepath("codelldb")
-      if codelldb_path == "" then
-        -- Fallback to Mason installation path
-        codelldb_path = vim.fn.stdpath("data") .. "/mason/bin/codelldb"
-      end
-
-      dap.adapters.codelldb = {
-        type = "server",
-        port = "${port}",
-        executable = {
-          command = codelldb_path,
-          args = { "--port", "${port}" },
-        },
-      }
-
-      dap.configurations.rust = {
-        {
-          name = "Launch",
-          type = "codelldb",
-          request = "launch",
-          program = function()
-            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/target/debug/", "file")
-          end,
-          cwd = "${workspaceFolder}",
-          stopOnEntry = true,
-        },
-        {
-          name = "Launch (no stop on entry)",
-          type = "codelldb",
-          request = "launch",
-          program = function()
-            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/target/debug/", "file")
-          end,
-          cwd = "${workspaceFolder}",
-          stopOnEntry = false,
-        },
-      }
-
-      -- Keymaps for debugging
+      -- DAP keymaps (adapter configuration is handled by RustaceanVim)
       vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
       vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Continue" })
       vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "Step Into" })
@@ -141,16 +120,10 @@ return {
     config = function()
       local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-      -- Get codelldb path with fallback to Mason installation
-      local codelldb_path = vim.fn.exepath("codelldb")
-      if codelldb_path == "" then
-        codelldb_path = vim.fn.stdpath("data") .. "/mason/bin/codelldb"
-      end
-
-      -- Get liblldb path
-      local liblldb_path = vim.fn.exepath("lldb-dap") or vim.fn.exepath("lldb-vscode")
-
       vim.g.rustaceanvim = {
+        tools = {
+          test_executor = "neotest", -- Use neotest for running tests
+        },
         server = {
           on_attach = function(client, bufnr)
             client.server_capabilities = vim.tbl_deep_extend("force", client.server_capabilities, capabilities)
@@ -193,12 +166,70 @@ return {
           },
         },
         dap = {
+          -- RustaceanVim will auto-detect codelldb from Mason or PATH
           adapter = require("rustaceanvim.config").get_codelldb_adapter(
-            codelldb_path,
-            liblldb_path
+            vim.fn.stdpath("data") .. "/mason/bin/codelldb",
+            vim.fn.exepath("lldb-dap") or vim.fn.exepath("lldb-vscode")
           ),
         },
       }
+    end,
+  },
+
+  -- Neotest for modern test running UI
+  {
+    "nvim-neotest/neotest",
+    dependencies = {
+      "nvim-neotest/nvim-nio",
+      "nvim-lua/plenary.nvim",
+      "antoinemadec/FixCursorHold.nvim",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("neotest").setup({
+        adapters = {
+          -- RustaceanVim provides its own neotest adapter
+          require("rustaceanvim.neotest"),
+        },
+        -- Neotest configuration
+        floating = {
+          border = "rounded",
+          max_height = 0.8,
+          max_width = 0.9,
+        },
+        summary = {
+          open = "botright vsplit | vertical resize 50",
+        },
+      })
+
+      -- Keymaps for neotest
+      vim.keymap.set("n", "<leader>tr", function()
+        require("neotest").run.run()
+      end, { desc = "Run nearest test" })
+
+      vim.keymap.set("n", "<leader>tf", function()
+        require("neotest").run.run(vim.fn.expand("%"))
+      end, { desc = "Run current file tests" })
+
+      vim.keymap.set("n", "<leader>td", function()
+        require("neotest").run.run({ strategy = "dap" })
+      end, { desc = "Debug nearest test" })
+
+      vim.keymap.set("n", "<leader>ts", function()
+        require("neotest").summary.toggle()
+      end, { desc = "Toggle test summary" })
+
+      vim.keymap.set("n", "<leader>to", function()
+        require("neotest").output.open({ enter = true })
+      end, { desc = "Show test output" })
+
+      vim.keymap.set("n", "<leader>tO", function()
+        require("neotest").output_panel.toggle()
+      end, { desc = "Toggle test output panel" })
+
+      vim.keymap.set("n", "<leader>tS", function()
+        require("neotest").run.stop()
+      end, { desc = "Stop test" })
     end,
   },
 }

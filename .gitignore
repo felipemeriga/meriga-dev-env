@@ -6,8 +6,16 @@ nvim/.netrwhist
 
 # Fish
 fish/fish_variables
+fish/fish_variables.*
+fish/local.fish
 fish/completions/
 fish/themes/
+
+# Yazi
+yazi/flavors/
+
+# NPM
+.npmrc
 
 # Editor/IDE
 .vscode/

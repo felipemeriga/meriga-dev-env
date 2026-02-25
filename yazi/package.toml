@@ -1,0 +1,12 @@
+[plugin]
+deps = []
+
+[[flavor.deps]]
+use = "gosxrgxx/flexoki-dark"
+rev = "28e1977"
+hash = "9dbbb64ea20f9f1271c31951dea55c7b"
+
+[[flavor.deps]]
+use = "tomer-ben-david/neon"
+rev = "50f2e60"
+hash = "d8ef467f001e92c9924ab3678f1e2705"

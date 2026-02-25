@@ -69,7 +69,13 @@ This configuration uses [LazyVim](https://www.lazyvim.org/) as a base.
 Plugins are automatically installed on first launch via Lazy.nvim. The configuration includes:
 
 - Custom colorscheme (Catppuccin)
-- Rust development tools
+- **Rust development tools:**
+  - RustaceanVim - LSP, DAP integration, runnables
+  - codelldb (via Mason) - Rust debugger
+  - crates.nvim - Cargo.toml dependency management
+  - nvim-dap + nvim-dap-ui - Debug adapter protocol
+  - nvim-dap-virtual-text - Inline variable values during debugging
+  - neotest - Modern test runner UI
 - Snippet support
 - And more in `nvim/lua/plugins/`
 
@@ -114,6 +120,19 @@ The Fish shell is configured with:
 - `EDITOR=nvim` - Neovim as default text editor
 - `VISUAL=nvim` - Neovim as visual editor
 - `FZF_DEFAULT_OPTS` - FZF configuration
+
+### Secrets and Tokens
+For security, personal tokens and API keys should be stored in `fish/local.fish` (not committed to git):
+
+```bash
+# Copy the example file
+cp fish/local.fish.example fish/local.fish
+
+# Edit and add your tokens
+nvim fish/local.fish
+```
+
+This file is automatically sourced by `config.fish` if it exists.
 
 ### Aliases
 - `ll` - `ls -lah` (detailed list)

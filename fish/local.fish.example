@@ -1,0 +1,13 @@
+# Local Fish Configuration (NOT committed to git)
+# Copy this file to local.fish and add your personal tokens/secrets
+
+# Example: NPM Token
+# set -gx NPM_TOKEN your_npm_token_here
+
+# Example: API Keys
+# set -gx OPENAI_API_KEY your_key_here
+# set -gx ANTHROPIC_API_KEY your_key_here
+
+# Example: AWS credentials (if not using SSO)
+# set -gx AWS_ACCESS_KEY_ID your_key_id
+# set -gx AWS_SECRET_ACCESS_KEY your_secret_key

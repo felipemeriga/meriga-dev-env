@@ -247,7 +247,18 @@ setup_fish() {
     print_success "Fish shell configured"
 
     # Change default shell to Fish
-    FISH_PATH="/usr/local/bin/fish"
+    FISH_PATH="$(command -v fish)"
+    if [ -z "$FISH_PATH" ]; then
+        print_error "Fish not found in PATH"
+        return 1
+    fi
+
+    # Add fish to /etc/shells if not present
+    if ! grep -q "$FISH_PATH" /etc/shells; then
+        print_info "Adding Fish to /etc/shells..."
+        echo "$FISH_PATH" | sudo tee -a /etc/shells
+    fi
+
     if [ "$SHELL" != "$FISH_PATH" ]; then
         print_info "Changing default shell to Fish..."
         if chsh -s "$FISH_PATH" "$USER"; then
