@@ -165,13 +165,17 @@ return {
             },
           },
         },
-        dap = {
-          -- RustaceanVim will auto-detect codelldb from Mason or PATH
-          adapter = require("rustaceanvim.config").get_codelldb_adapter(
-            vim.fn.stdpath("data") .. "/mason/bin/codelldb",
-            vim.fn.exepath("lldb-dap") or vim.fn.exepath("lldb-vscode")
-          ),
-        },
+        dap = (function()
+          local codelldb = vim.fn.stdpath("data") .. "/mason/bin/codelldb"
+          if vim.fn.executable(codelldb) == 1 then
+            local lib = vim.fn.exepath("lldb-dap")
+            if lib == "" then lib = vim.fn.exepath("lldb-vscode") end
+            if lib ~= "" then
+              return { adapter = require("rustaceanvim.config").get_codelldb_adapter(codelldb, lib) }
+            end
+          end
+          return {}
+        end)(),
       }
     end,
   },

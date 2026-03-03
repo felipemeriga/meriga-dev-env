@@ -1,7 +1,7 @@
 return {
   -- Mason for managing LSP servers, DAP adapters, linters, and formatters
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = {
       ensure_installed = {
         -- DAP

@@ -37,3 +37,9 @@ Thumbs.db
 *.backup
 *.bak
 *.old
+
+# Build artifacts
+yazi-*/
+
+# Plans / docs artifacts
+docs/plans/
