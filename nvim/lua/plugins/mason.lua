@@ -7,6 +7,13 @@ return {
         -- DAP
         "codelldb", -- Rust debugger
 
+        -- Go tools
+        "gopls", -- Go language server
+        "delve", -- Go debugger
+        "goimports", -- Go imports organizer
+        "gofumpt", -- Strict Go formatter
+        "golangci-lint", -- Go linter
+
         -- Formatters and linters
         "stylua", -- Lua formatter
         "shfmt", -- Shell script formatter
