@@ -11,6 +11,18 @@ fish/local.fish
 fish/completions/
 fish/themes/
 
+# Fisher-managed plugin code — rebuilt from fish_plugins on install, never committed.
+# Ignore everything Fisher writes into functions/ and conf.d/ (and tide's generated
+# fish_prompt.fish / fish_mode_prompt.fish), then whitelist personal functions below.
+fish/conf.d/*
+fish/functions/*
+!fish/functions/y.fish
+!fish/functions/build-player.fish
+!fish/functions/deploy-player.fish
+!fish/functions/restart-player.fish
+!fish/functions/start-player.fish
+!fish/functions/stop-player.fish
+
 # Yazi
 yazi/flavors/
 

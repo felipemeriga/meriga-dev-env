@@ -36,6 +36,11 @@ end
 set -gx BUN_INSTALL $HOME/.bun
 set -gx PATH $BUN_INSTALL/bin $PATH
 
+# Node.js global bin (npm/yarn/npx installed globally)
+if test -d /usr/local/lib/nodejs/node-v20.17.0-linux-x64/bin
+    set -gx PATH /usr/local/lib/nodejs/node-v20.17.0-linux-x64/bin $PATH
+end
+
 # Other paths
 set -gx PATH $HOME/.local/bin $PATH
 set -gx PATH $HOME/.cargo/bin $PATH
@@ -61,6 +66,12 @@ end
 if test -d /usr/local/cuda
     set -gx CUDA_PATH /usr/local/cuda
     set -gx CUDA_HOME /usr/local/cuda
+    set -gx PATH /usr/local/cuda/bin $PATH
+end
+
+# LLVM/Clang (Linux)
+if test -d /usr/lib/llvm-19/lib
+    set -gx LIBCLANG_PATH /usr/lib/llvm-19/lib
 end
 
 # NPM Token - Load from local file if exists (not committed to git)

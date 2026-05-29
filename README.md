@@ -51,8 +51,11 @@ ln -sf ~/dotfiles/yazi ~/.config/yazi
 # Install Fisher for Fish
 fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 
-# Install Fish plugins
+# Install Fish plugins (rebuilt from fish/fish_plugins)
 fish -c "fisher update"
+
+# Apply the tide prompt configuration
+fish -c "source ~/dotfiles/fish/tide_config.fish"
 
 # Change default shell to Fish
 chsh -s /usr/local/bin/fish $USER
@@ -79,6 +82,11 @@ Plugins are automatically installed on first launch via Lazy.nvim. The configura
 - Snippet support
 - And more in `nvim/lua/plugins/`
 
+> **Rust LSP:** RustaceanVim does not install `rust-analyzer` — it launches the one on
+> your `PATH`/rustup. `install.sh` runs `rustup component add rust-analyzer` for you. If
+> you set Rust up by hand and get no diagnostics on a fresh machine, run that command
+> (the bare `rust-analyzer` on `PATH` is a rustup proxy that fails until the component exists).
+
 ### Customization
 
 - `nvim/lua/config/` - Core configuration files
@@ -103,6 +111,12 @@ The following plugins are automatically installed:
 - `ajeetdsouza/zoxide` - Smarter cd command
 - `ilancosman/tide` - Modern prompt theme
 
+> **Note:** Plugin *source code* is never committed. Because `~/.config/fish` is a
+> symlink into this repo, Fisher writes plugins into `fish/functions/` and `fish/conf.d/`,
+> but those paths are gitignored. The repo only tracks the `fish/fish_plugins` manifest,
+> and Fisher rebuilds the plugins from it on each machine. This keeps installs
+> cross-platform (no stale macOS-built plugin files leaking onto Linux) and keeps diffs clean.
+
 ### Adding More Plugins
 
 To add a new Fish plugin:
@@ -111,7 +125,25 @@ To add a new Fish plugin:
 fisher install owner/repo
 ```
 
-The plugin will be automatically added to `fish/fish_plugins`.
+The plugin will be automatically added to `fish/fish_plugins` (the only file you commit).
+
+### Tide Prompt Configuration
+
+Tide stores its settings in Fish universal variables (`fish_variables`), which is gitignored
+and machine-specific. To make the prompt reproducible, the settings are captured in
+`fish/tide_config.fish`, which `install.sh` replays automatically.
+
+After changing your prompt with `tide configure`, regenerate the captured config:
+
+```fish
+begin
+    echo "# Tide prompt configuration — replayed by install.sh."
+    echo ""
+    for v in (set -nU | string match "tide_*" | sort)
+        echo "set -U $v "(string escape -- $$v | string join " ")
+    end
+end > ~/dotfiles/fish/tide_config.fish
+```
 
 ## Fish Shell Configuration
 
@@ -220,6 +252,27 @@ cp -r ~/.dotfiles_backup_*/* ~/.config/
 ### Neovim plugins not installing
 
 Run `:Lazy sync` inside Neovim to manually sync plugins.
+
+### No Treesitter highlighting (parsers fail to compile)
+
+nvim-treesitter's `main` branch compiles parsers with a `tree-sitter` CLI. The prebuilt
+CLI it auto-downloads requires glibc 2.39 and fails on older distros (e.g. Debian 12,
+glibc 2.36) with `version 'GLIBC_2.39' not found`. Build the CLI from source instead
+(`install.sh` does this automatically):
+
+```bash
+cargo install tree-sitter-cli   # links against local glibc, installs to ~/.cargo/bin
+```
+
+Then reinstall parsers in Neovim with `:TSUpdate` (or `:TSInstall <lang>`).
+
+### No diagnostics on Rust files
+
+`rust-analyzer` on `PATH` is a rustup proxy that fails until the component is installed:
+
+```bash
+rustup component add rust-analyzer
+```
 
 ### Fish plugins not working
 

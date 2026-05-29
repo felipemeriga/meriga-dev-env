@@ -159,13 +159,24 @@ setup_fish() {
     rm -rf "$HOME/.config/fish"
     ln -sf "$DOTFILES_DIR/fish" "$HOME/.config/fish"
 
-    # Install Fisher + plugins
+    # Install Fisher, then reconcile every plugin from the fish_plugins manifest.
+    # Plugin source is NOT committed to the repo — Fisher rebuilds it here. This keeps
+    # the install cross-platform (no stale macOS-built plugin files leaking onto Linux).
     print_info "Installing Fisher plugin manager..."
     fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 
     if [ -f "$DOTFILES_DIR/fish/fish_plugins" ]; then
-        print_info "Installing Fish plugins..."
+        print_info "Installing Fish plugins from manifest..."
         fish -c "fisher update"
+    fi
+
+    # Reproduce the tide prompt non-interactively. Tide's settings live in universal
+    # variables (fish_variables, gitignored), so we replay the captured config here.
+    # fish_prompt re-derives the rest on first interactive launch (and skips items for
+    # tools that aren't installed), so this is safe across machines.
+    if [ -f "$DOTFILES_DIR/fish/tide_config.fish" ]; then
+        print_info "Applying tide prompt configuration..."
+        fish -c "source '$DOTFILES_DIR/fish/tide_config.fish'"
     fi
 
     # Set Fish as default shell
@@ -191,6 +202,47 @@ setup_yazi() {
     print_success "Yazi configuration linked"
 }
 
+# ── Rust toolchain + rust-analyzer (Neovim/RustaceanVim LSP) ──────────
+setup_rust() {
+    print_info "Setting up Rust toolchain..."
+
+    if ! command -v rustup &> /dev/null; then
+        print_info "Installing rustup..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+        # shellcheck disable=SC1091
+        [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+        export PATH="$HOME/.cargo/bin:$PATH"
+    fi
+
+    # RustaceanVim launches `rust-analyzer` from PATH/rustup but does NOT install it.
+    # Without this component the rustup proxy errors out ("Unknown binary 'rust-analyzer'")
+    # and the LSP never attaches — Neovim then shows no diagnostics on Rust files.
+    if command -v rustup &> /dev/null; then
+        print_info "Installing rust-analyzer component..."
+        rustup component add rust-analyzer \
+            && print_success "rust-analyzer installed" \
+            || print_error "Failed — run manually: rustup component add rust-analyzer"
+    else
+        print_error "rustup not found — install Rust, then run: rustup component add rust-analyzer"
+    fi
+
+    # nvim-treesitter's `main` branch (used by LazyVim) compiles parsers with a
+    # tree-sitter CLI. The prebuilt CLI it auto-downloads needs glibc 2.39, which
+    # breaks on older distros (e.g. Debian 12 / glibc 2.36) — no parsers compile, so
+    # there's no Treesitter highlighting. Building the CLI from source via cargo links
+    # against the local glibc and lands in ~/.cargo/bin (already on PATH).
+    if command -v cargo &> /dev/null; then
+        if command -v tree-sitter &> /dev/null; then
+            print_success "tree-sitter CLI already installed"
+        else
+            print_info "Installing tree-sitter CLI (compiling, may take a few minutes)..."
+            cargo install tree-sitter-cli \
+                && print_success "tree-sitter CLI installed" \
+                || print_error "Failed — run manually: cargo install tree-sitter-cli"
+        fi
+    fi
+}
+
 # ── Main ──────────────────────────────────────────────────────────────
 main() {
     read -p "Install dependencies and link dotfiles? (y/n) " -n 1 -r
@@ -209,6 +261,7 @@ main() {
     setup_neovim
     setup_fish
     setup_yazi
+    setup_rust
 
     echo ""
     echo "================================"
