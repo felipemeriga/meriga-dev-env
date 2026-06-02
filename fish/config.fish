@@ -41,6 +41,16 @@ if test -d /usr/local/lib/nodejs/node-v20.17.0-linux-x64/bin
     set -gx PATH /usr/local/lib/nodejs/node-v20.17.0-linux-x64/bin $PATH
 end
 
+# Node.js via classic nvm (~/.nvm) — put the installed node on PATH so node/npm/npx
+# work out of the box. The nvm.fish plugin still handles version switching on top.
+if test -d $HOME/.nvm/versions/node
+    set -gx NVM_DIR $HOME/.nvm
+    for _node_bin in $NVM_DIR/versions/node/*/bin
+        test -d $_node_bin; and set -gx PATH $_node_bin $PATH
+    end
+    set -e _node_bin
+end
+
 # Other paths
 set -gx PATH $HOME/.local/bin $PATH
 set -gx PATH $HOME/.cargo/bin $PATH
@@ -67,6 +77,7 @@ if test -d /usr/local/cuda
     set -gx CUDA_PATH /usr/local/cuda
     set -gx CUDA_HOME /usr/local/cuda
     set -gx PATH /usr/local/cuda/bin $PATH
+    set -gx LD_LIBRARY_PATH /usr/local/cuda/lib64 $LD_LIBRARY_PATH
 end
 
 # LLVM/Clang (Linux)

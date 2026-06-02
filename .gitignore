@@ -55,3 +55,6 @@ yazi-*/
 
 # Plans / docs artifacts
 docs/plans/
+
+# tmux plugin source — installed by TPM into ~/.tmux/plugins, never committed
+tmux/plugins/
