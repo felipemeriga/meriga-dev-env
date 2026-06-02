@@ -159,7 +159,10 @@ return {
 
           default_settings = {
             ["rust-analyzer"] = {
-              cargo = { allFeatures = true },
+              -- Use default cargo features. allFeatures/"all" can break
+              -- `cargo check` on crates with mutually-exclusive features,
+              -- which silently suppresses all diagnostics.
+              cargo = { features = {} },
               procMacro = { enable = true },
               completion = { postfix = { enable = true } },
             },
