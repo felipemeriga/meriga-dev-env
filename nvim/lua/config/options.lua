@@ -5,6 +5,11 @@
 -- Sync Neovim's yank/delete with the system clipboard.
 vim.opt.clipboard = "unnamedplus"
 
+-- LazyVim's Python extra supports basedpyright (community fork: faster, no
+-- telemetry) or pyright. Must be set before the extra loads — options.lua
+-- runs pre-lazy, so this is the right place.
+vim.g.lazyvim_python_lsp = "basedpyright"
+
 -- Over SSH (or any session without a local display) there is no X/Wayland
 -- clipboard to talk to, so fall back to OSC 52: the terminal forwards the
 -- copied text to the clipboard of the machine running the terminal.

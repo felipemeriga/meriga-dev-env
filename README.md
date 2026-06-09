@@ -79,6 +79,15 @@ Plugins are automatically installed on first launch via Lazy.nvim. The configura
   - nvim-dap + nvim-dap-ui - Debug adapter protocol
   - nvim-dap-virtual-text - Inline variable values during debugging
   - neotest - Modern test runner UI
+- **Go development tools** (via LazyVim `lang.go` extra):
+  - gopls - LSP with rich inlay hints
+  - gofumpt + goimports - format-on-save via conform.nvim
+  - golangci-lint - linting
+  - Buffer-local keymaps in Go files: `<leader>gb` build, `<leader>gr` run, `<leader>gt` test
+- **Python development tools** (via LazyVim `lang.python` extra):
+  - basedpyright - LSP (community fork: faster, no telemetry)
+  - ruff - lint + format on save via conform.nvim
+  - Buffer-local keymap in Python files: `<leader>pr` run file
 - Snippet support
 - And more in `nvim/lua/plugins/`
 
@@ -86,6 +95,11 @@ Plugins are automatically installed on first launch via Lazy.nvim. The configura
 > your `PATH`/rustup. `install.sh` runs `rustup component add rust-analyzer` for you. If
 > you set Rust up by hand and get no diagnostics on a fresh machine, run that command
 > (the bare `rust-analyzer` on `PATH` is a rustup proxy that fails until the component exists).
+
+> **Go / Python toolchains:** Mason installs gopls via `go install` and ruff/debugpy
+> via pip, so `go` and `python3` must be on `PATH` before opening a Go/Python file.
+> On macOS: `brew install go python`. On Ubuntu: `sudo apt-get install golang-go python3 python3-pip`
+> (or use the official Go tarball for a current version).
 
 ### Customization
 
