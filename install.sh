@@ -51,7 +51,7 @@ install_macos() {
     fi
 
     print_info "Installing tools via Homebrew..."
-    brew install git curl ripgrep fd fish neovim yazi
+    brew install git curl ripgrep fd fish neovim yazi tmux
 
     print_success "All tools installed via Homebrew"
 }
@@ -61,7 +61,7 @@ install_ubuntu() {
     print_info "Installing system packages..."
     sudo apt-get update
     sudo apt-get install -y \
-        git curl wget build-essential unzip ripgrep fd-find
+        git curl wget build-essential unzip ripgrep fd-find tmux
 
     install_fish_binary
     install_neovim_binary
@@ -143,6 +143,8 @@ backup_configs() {
     [ -d "$HOME/.config/nvim" ] && cp -r "$HOME/.config/nvim" "$backup_dir/"
     [ -d "$HOME/.config/fish" ] && cp -r "$HOME/.config/fish" "$backup_dir/"
     [ -d "$HOME/.config/yazi" ] && cp -r "$HOME/.config/yazi" "$backup_dir/"
+    [ -d "$HOME/.config/tmux" ] && cp -r "$HOME/.config/tmux" "$backup_dir/"
+    [ -f "$HOME/.tmux.conf" ]   && cp "$HOME/.tmux.conf" "$backup_dir/"
 
     print_success "Backup created at $backup_dir"
 }
@@ -200,6 +202,37 @@ setup_yazi() {
     rm -rf "$HOME/.config/yazi"
     ln -sf "$DOTFILES_DIR/yazi" "$HOME/.config/yazi"
     print_success "Yazi configuration linked"
+}
+
+setup_tmux() {
+    print_info "Setting up tmux..."
+
+    # tmux.conf lives at ~/.config/tmux/tmux.conf (XDG path, read by tmux 3.1+),
+    # consistent with the nvim/fish/yazi symlinks. Remove any legacy ~/.tmux.conf
+    # so the two configs can't disagree (it's already saved by backup_configs).
+    [ -e "$HOME/.tmux.conf" ] && rm -f "$HOME/.tmux.conf"
+    rm -rf "$HOME/.config/tmux"
+    ln -sf "$DOTFILES_DIR/tmux" "$HOME/.config/tmux"
+
+    # TPM (Tmux Plugin Manager) is cloned here, not committed — tmux.conf's plugin
+    # lines (tpm/resurrect/continuum) do nothing without it. tmux/plugins/ is
+    # gitignored; TPM installs the plugin source into ~/.tmux/plugins.
+    local tpm_dir="$HOME/.tmux/plugins/tpm"
+    if [ ! -d "$tpm_dir" ]; then
+        print_info "Installing TPM (tmux plugin manager)..."
+        git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir"
+    fi
+
+    # Install the plugins declared in tmux.conf non-interactively (no running
+    # server needed). Without this, prefix+I would be required on first launch.
+    if [ -x "$tpm_dir/bin/install_plugins" ]; then
+        print_info "Installing tmux plugins from config..."
+        "$tpm_dir/bin/install_plugins" > /dev/null 2>&1 \
+            && print_success "tmux plugins installed" \
+            || print_info "Run manually inside tmux: prefix + I"
+    fi
+
+    print_success "tmux configuration linked"
 }
 
 # ── Rust toolchain + rust-analyzer (Neovim/RustaceanVim LSP) ──────────
@@ -261,6 +294,7 @@ main() {
     setup_neovim
     setup_fish
     setup_yazi
+    setup_tmux
     setup_rust
 
     echo ""
