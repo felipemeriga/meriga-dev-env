@@ -1,6 +1,5 @@
 # Neovim
 nvim/.DS_Store
-nvim/lazy-lock.json
 nvim/plugin/
 nvim/.netrwhist
 
