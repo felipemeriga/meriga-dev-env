@@ -115,19 +115,20 @@ return {
   {
     "mrcjkb/rustaceanvim",
     ft = "rust",
-    version = "^4",
+    -- v9 requires Neovim 0.12; v8 is the latest major supporting 0.11.
+    version = "^8",
 
     config = function()
-      local capabilities = require("blink.cmp").get_lsp_capabilities()
-
       vim.g.rustaceanvim = {
         tools = {
           test_executor = "neotest", -- Use neotest for running tests
         },
         server = {
-          on_attach = function(client, bufnr)
-            client.server_capabilities = vim.tbl_deep_extend("force", client.server_capabilities, capabilities)
+          -- Since rustaceanvim v6, client capabilities are no longer
+          -- auto-registered — pass blink.cmp's here explicitly.
+          capabilities = require("blink.cmp").get_lsp_capabilities(),
 
+          on_attach = function(client, bufnr)
             -- keymaps básicos de LSP
             local opts = { buffer = bufnr, silent = true }
             vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
@@ -168,17 +169,9 @@ return {
             },
           },
         },
-        dap = (function()
-          local codelldb = vim.fn.stdpath("data") .. "/mason/bin/codelldb"
-          if vim.fn.executable(codelldb) == 1 then
-            local lib = vim.fn.exepath("lldb-dap")
-            if lib == "" then lib = vim.fn.exepath("lldb-vscode") end
-            if lib ~= "" then
-              return { adapter = require("rustaceanvim.config").get_codelldb_adapter(codelldb, lib) }
-            end
-          end
-          return {}
-        end)(),
+        -- DAP: no explicit adapter config needed. Mason puts codelldb on
+        -- nvim's PATH and rustaceanvim auto-detects it (codelldb ships its
+        -- own bundled lldb, so no liblldb path is required).
       }
     end,
   },
