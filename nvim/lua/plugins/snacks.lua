@@ -7,6 +7,15 @@ return {
     "folke/snacks.nvim",
     opts = {
       scroll = { enabled = false },
+      picker = {
+        sources = {
+          -- Show dotfiles in the explorer side panel (<leader>e) by default.
+          -- `H` toggles hidden files at runtime, `I` toggles git-ignored ones.
+          explorer = { hidden = true },
+          -- Also find dotfiles with the file picker (<leader>ff / <leader><space>).
+          files = { hidden = true },
+        },
+      },
     },
   },
 }
